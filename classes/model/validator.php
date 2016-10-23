@@ -46,6 +46,27 @@ class Validator extends Model
         if ($this->preferences->get('foolfuuka.plugins.spam_guard.enable_akismet')) {
             $this->processAkismet($request, $comment->comment);
         }
+
+        $tor_limits = $this->preferences->get('foolfuuka.plugins.spam_guard.tor_limits', '');
+        if ($tor_limits !== '' && $tor_limits !== 'none') {
+            if ($this->isTorConnection($request, Inet::dtop($comment->poster_ip))) {
+                switch ($tor_limits) {
+                    case 'captcha':
+                        throw new \Foolz\FoolFuuka\Model\CommentSendingRequestCaptchaException;
+                        break;
+                    case 'noimage':
+                        if($request->files->count()) {
+                            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('Posting images via Tor has been disabled.'));
+                        }
+                        break;
+                    case 'nopost':
+                        throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('Posting via Tor has been disabled.'));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     public function processAkismet($request, $comment)
@@ -112,4 +133,26 @@ class Validator extends Model
 
         return ($ip & $netmask) == $subnet;
     }
+
+
+    /**
+     * Simple way to detect Tor exit connection by using TorDNSEL.
+     * This won't work if the server isn't aware of it's true public IP.
+     * If that's the case replace $request->server->get('SERVER_ADDR') with some other public IP.
+     * @param $request
+     * @param string $poster_ip
+     * @return bool true if Tor connection
+     */
+    public function isTorConnection($request, $poster_ip)
+    {
+        // TorDNSEL doesn't support IPv6 yet
+        if (filter_var($poster_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($request->server->get('SERVER_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return false;
+        }
+        if (gethostbyname(implode('.', array_reverse(explode('.', $poster_ip))) . '.80.' . implode('.', array_reverse(explode('.', $request->server->get('SERVER_ADDR')))) . '.ip-port.exitlist.torproject.org') === '127.0.0.2') {
+            return true;
+        }
+        return false;
+    }
+
 }

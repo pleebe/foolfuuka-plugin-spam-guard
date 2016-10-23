@@ -57,6 +57,14 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'type' => 'checkbox',
                 'help' => _i('Enforce Captcha on first ghost post.')
             ],
+            'foolfuuka.plugins.spam_guard.tor_limits' => [
+                'preferences' => true,
+                'label' => _i('Tor limits'),
+                'help' => _i('Limit posting for users coming from Tor connection? This might not always work but will never limit non-Tor users.'),
+                'type' => 'select',
+                'default_value' => 'none',
+                'options' => ['none' => _i('No limits'), 'captcha' => _i('Always ask for captcha solution'), 'noimage' => _i('Disable image posting'), 'nopost' => _i('Disable all posting')]
+            ],
             'submit' => [
                 'type' => 'submit',
                 'class' => 'btn-primary',
