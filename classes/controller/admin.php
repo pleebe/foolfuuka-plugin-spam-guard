@@ -57,6 +57,14 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'type' => 'checkbox',
                 'help' => _i('Enforce Captcha on first ghost post.')
             ],
+            'foolfuuka.plugins.spam_guard.ban_ranges' => [
+                'preferences' => true,
+                'type' => 'textarea',
+                'label' => _i('Banned IP ranges'),
+                'help' => _i('Addressed in these ranges will not be allowed to post on any board.'),
+                'class' => 'span8',
+                'validation' => [new Trim()]
+            ],
             'foolfuuka.plugins.spam_guard.tor_limits' => [
                 'preferences' => true,
                 'label' => _i('Tor limits'),
@@ -64,6 +72,9 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'type' => 'select',
                 'default_value' => 'none',
                 'options' => ['none' => _i('No limits'), 'captcha' => _i('Always ask for captcha solution'), 'noimage' => _i('Disable image posting'), 'nopost' => _i('Disable all posting')]
+            ],
+            'separator-3' => [
+                'type' => 'separator'
             ],
             'submit' => [
                 'type' => 'submit',

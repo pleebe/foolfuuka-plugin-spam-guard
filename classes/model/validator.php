@@ -6,6 +6,7 @@ use Foolz\Inet\Inet;
 use Foolz\FoolFrame\Model\Context;
 use Foolz\FoolFrame\Model\DoctrineConnection;
 use Foolz\FoolFrame\Model\Model;
+use Foolz\FoolFrame\Model\Preferences;
 use Symfony\Component\HttpFoundation\Request;
 
 class Validator extends Model
@@ -97,6 +98,11 @@ class Validator extends Model
     {
         if (preg_match('/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/', $comment->poster_ip)) {
             $range = [];
+
+            try {
+                $range = preg_split('/\r\n|\r|\n/', $this->preferences->get('foolfuuka.plugins.spam_guard.ban_ranges', []));
+            } catch (\Exception $e) {
+            }
 
             foreach ($range as $cidr) {
                 if ($this->isMatchCIDR(Inet::dtop($comment->poster_ip), $cidr)) {
