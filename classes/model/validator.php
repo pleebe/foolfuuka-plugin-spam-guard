@@ -68,6 +68,22 @@ class Validator extends Model
                 }
             }
         }
+
+        $word_limits = $this->preferences->get('foolfuuka.plugins.spam_guard.word_limits', '');
+        if ($word_limits !== '' && $word_limits !== 'none') {
+            if ($this->processWordFilter($comment->comment)) {
+                switch ($word_limits) {
+                    case 'captcha':
+                        throw new \Foolz\FoolFuuka\Model\CommentSendingRequestCaptchaException;
+                        break;
+                    case 'nopost':
+                        throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     public function processAkismet($request, $comment)
@@ -161,4 +177,30 @@ class Validator extends Model
         return false;
     }
 
+    public function processWordFilter($comment)
+    {
+        $words = [];
+
+        try {
+            $words = preg_split('/\r\n|\r|\n/', $this->preferences->get('foolfuuka.plugins.spam_guard.words', []));
+        } catch (\Exception $e) {
+        }
+
+        foreach ($words as $word) {
+            if (strpos($comment->name, $word) !== false) {
+                return true;
+            }
+            if (strpos($comment->email, $word) !== false) {
+                return true;
+            }
+            if (strpos($comment->comment, $word) !== false) {
+                return true;
+            }
+            if (strpos($comment->title, $word) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

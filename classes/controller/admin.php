@@ -65,6 +65,22 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'class' => 'span8',
                 'validation' => [new Trim()]
             ],
+            'foolfuuka.plugins.spam_guard.words' => [
+                'preferences' => true,
+                'type' => 'textarea',
+                'label' => _i('Word filter'),
+                'help' => _i('Filter posts by words.'),
+                'class' => 'span8',
+                'validation' => [new Trim()]
+            ],
+            'foolfuuka.plugins.spam_guard.word_limits' => [
+                'preferences' => true,
+                'label' => _i('Word filter limiting'),
+                'help' => _i('Limit posting by word filter.'),
+                'type' => 'select',
+                'default_value' => 'none',
+                'options' => ['none' => _i('No limits'), 'captcha' => _i('Always ask for captcha solution'), 'nopost' => _i('Disable all posting')]
+            ],
             'foolfuuka.plugins.spam_guard.tor_limits' => [
                 'preferences' => true,
                 'label' => _i('Tor limits'),
