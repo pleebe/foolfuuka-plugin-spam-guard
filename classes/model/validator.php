@@ -47,42 +47,21 @@ class Validator extends Model
         if ($this->preferences->get('foolfuuka.plugins.spam_guard.enable_akismet')) {
             $this->processAkismet($request, $comment->comment);
         }
+    }
 
-        $tor_limits = $this->preferences->get('foolfuuka.plugins.spam_guard.tor_limits', '');
-        if ($tor_limits !== '' && $tor_limits !== 'none') {
-            if ($this->isTorConnection($request, Inet::dtop($comment->poster_ip))) {
-                switch ($tor_limits) {
-                    case 'captcha':
-                        throw new \Foolz\FoolFuuka\Model\CommentSendingRequestCaptchaException;
-                        break;
-                    case 'noimage':
-                        if($request->files->count()) {
-                            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('Posting images via Tor has been disabled.'));
-                        }
-                        break;
-                    case 'nopost':
-                        throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('Posting via Tor has been disabled.'));
-                        break;
-                    default:
-                        break;
-                }
-            }
+    public function checkCommentAfter($object)
+    {
+        $request = Request::createFromGlobals();
+        $comment = $object->getObject();
+
+        if ($this->preferences->get('foolfuuka.plugins.spam_guard.tor_limits', false)
+            && $this->isTorConnection($request, Inet::dtop($comment->poster_ip))) {
+            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('Posting via Tor has been disabled.'));
         }
 
-        $word_limits = $this->preferences->get('foolfuuka.plugins.spam_guard.word_limits', '');
-        if ($word_limits !== '' && $word_limits !== 'none') {
-            if ($this->processWordFilter($comment->comment)) {
-                switch ($word_limits) {
-                    case 'captcha':
-                        throw new \Foolz\FoolFuuka\Model\CommentSendingRequestCaptchaException;
-                        break;
-                    case 'nopost':
-                        throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
-                        break;
-                    default:
-                        break;
-                }
-            }
+        if ($this->preferences->get('foolfuuka.plugins.spam_guard.words', false)
+            && $this->processWordFilter($comment->comment)) {
+            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
         }
     }
 
@@ -113,16 +92,13 @@ class Validator extends Model
     public function processCIDR($request, $comment)
     {
         if (preg_match('/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/', $comment->poster_ip)) {
-            $range = [];
+            if ($range = $this->preferences->get('foolfuuka.plugins.spam_guard.ban_ranges', false)) {
+                $range = preg_split('/\r\n|\r|\n/', $range);
 
-            try {
-                $range = preg_split('/\r\n|\r|\n/', $this->preferences->get('foolfuuka.plugins.spam_guard.ban_ranges', []));
-            } catch (\Exception $e) {
-            }
-
-            foreach ($range as $cidr) {
-                if ($this->isMatchCIDR(Inet::dtop($comment->poster_ip), $cidr)) {
-                    throw new \Foolz\Foolfuuka\Model\CommentSendingBannedException('We were unable to process your comment at this time.');
+                foreach ($range as $cidr) {
+                    if ($this->isMatchCIDR(Inet::dtop($comment->poster_ip), $cidr)) {
+                        throw new \Foolz\Foolfuuka\Model\CommentSendingBannedException('We were unable to process your comment at this time.');
+                    }
                 }
             }
         }
@@ -179,25 +155,22 @@ class Validator extends Model
 
     public function processWordFilter($comment)
     {
-        $words = [];
+        if ($words = $this->preferences->get('foolfuuka.plugins.spam_guard.words', false)) {
+            $words = preg_split('/\r\n|\r|\n/', $words);
 
-        try {
-            $words = preg_split('/\r\n|\r|\n/', $this->preferences->get('foolfuuka.plugins.spam_guard.words', []));
-        } catch (\Exception $e) {
-        }
-
-        foreach ($words as $word) {
-            if (strpos($comment->name, $word) !== false) {
-                return true;
-            }
-            if (strpos($comment->email, $word) !== false) {
-                return true;
-            }
-            if (strpos($comment->comment, $word) !== false) {
-                return true;
-            }
-            if (strpos($comment->title, $word) !== false) {
-                return true;
+            foreach ($words as $word) {
+                if (strpos($comment->name, $word) !== false) {
+                    return true;
+                }
+                if (strpos($comment->email, $word) !== false) {
+                    return true;
+                }
+                if (strpos($comment->comment, $word) !== false) {
+                    return true;
+                }
+                if (strpos($comment->title, $word) !== false) {
+                    return true;
+                }
             }
         }
 

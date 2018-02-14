@@ -65,6 +65,12 @@ class HHVM_SpamGuard
                             $context->getService('foolfuuka-plugin.spam_guard_validator')->checkComment($object);
                         }
                     });
+                Event::forge('Foolz\FoolFuuka\Model\CommentInsert::insert#obj.afterInputCheck')
+                    ->setCall(function ($object) use ($context) {
+                        if (!$context->getService('auth')->hasAccess('maccess.mod')) {
+                            $context->getService('foolfuuka-plugin.spam_guard_validator')->checkCommentAfter($object);
+                        }
+                    });
             });
 
         Event::forge('Foolz\FoolFrame\Model\Plugin::install#foolz/foolfuuka-plugin-spam-guard')

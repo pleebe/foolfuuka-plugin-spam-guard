@@ -60,7 +60,7 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
             'foolfuuka.plugins.spam_guard.ban_ranges' => [
                 'preferences' => true,
                 'type' => 'textarea',
-                'label' => _i('Banned IP ranges'),
+                'label' => _i('Banned IP ranges (one per line)'),
                 'help' => _i('Addressed in these ranges will not be allowed to post on any board.'),
                 'class' => 'span8',
                 'validation' => [new Trim()]
@@ -68,26 +68,16 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
             'foolfuuka.plugins.spam_guard.words' => [
                 'preferences' => true,
                 'type' => 'textarea',
-                'label' => _i('Word filter'),
-                'help' => _i('Filter posts by words.'),
+                'label' => _i('Word filter (one per line)'),
+                'help' => _i('Filter posts by words. Leave blank to disable.'),
                 'class' => 'span8',
                 'validation' => [new Trim()]
             ],
-            'foolfuuka.plugins.spam_guard.word_limits' => [
-                'preferences' => true,
-                'label' => _i('Word filter limiting'),
-                'help' => _i('Limit posting by word filter.'),
-                'type' => 'select',
-                'default_value' => 'none',
-                'options' => ['none' => _i('No limits'), 'captcha' => _i('Always ask for captcha solution'), 'nopost' => _i('Disable all posting')]
-            ],
             'foolfuuka.plugins.spam_guard.tor_limits' => [
                 'preferences' => true,
-                'label' => _i('Tor limits'),
-                'help' => _i('Limit posting for users coming from Tor connection? This might not always work but will never limit non-Tor users.'),
-                'type' => 'select',
-                'default_value' => 'none',
-                'options' => ['none' => _i('No limits'), 'captcha' => _i('Always ask for captcha solution'), 'noimage' => _i('Disable image posting'), 'nopost' => _i('Disable all posting')]
+                'label' => _i(''),
+                'help' => _i('Disable posting from Tor? This might not always work but will never limit non-Tor users.'),
+                'type' => 'checkbox',
             ],
             'separator-3' => [
                 'type' => 'separator'
