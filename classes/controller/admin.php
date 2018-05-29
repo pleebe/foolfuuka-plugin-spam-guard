@@ -79,6 +79,16 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'help' => _i('Disable posting from Tor? This might not always work but will never limit non-Tor users.'),
                 'type' => 'checkbox',
             ],
+            'foolfuuka.plugins.spam_guard.disable_email' => [
+                'preferences' => true,
+                'type' => 'checkbox',
+                'help' => _i('Email address spam trap.')
+            ],
+            'foolfuuka.plugins.spam_guard.disable_subject' => [
+                'preferences' => true,
+                'type' => 'checkbox',
+                'help' => _i('Post subject spam trap.')
+            ],
             'separator-3' => [
                 'type' => 'separator'
             ],

@@ -63,6 +63,14 @@ class Validator extends Model
             && $this->processWordFilter($comment->comment)) {
             throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
         }
+
+        if ($this->preferences->get('foolfuuka.plugins.spam_guard.disable_email') && $comment->email) {
+            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
+        }
+
+        if ($this->preferences->get('foolfuuka.plugins.spam_guard.disable_subject') && (bool)$comment->thread_num && $comment->title) {
+            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
+        }
     }
 
     public function processAkismet($request, $comment)
