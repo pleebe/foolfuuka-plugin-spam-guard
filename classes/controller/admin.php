@@ -89,6 +89,11 @@ class SpamGuard extends \Foolz\FoolFrame\Controller\Admin
                 'type' => 'checkbox',
                 'help' => _i('Post subject spam trap.')
             ],
+            'foolfuuka.plugins.spam_guard.disable_nocomment' => [
+                'preferences' => true,
+                'type' => 'checkbox',
+                'help' => _i('Do not allow posts with just quote links (>>number).')
+            ],
             'separator-3' => [
                 'type' => 'separator'
             ],

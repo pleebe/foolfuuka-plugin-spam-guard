@@ -71,6 +71,10 @@ class Validator extends Model
         if ($this->preferences->get('foolfuuka.plugins.spam_guard.disable_subject') && (bool)$comment->thread_num && $comment->title) {
             throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
         }
+
+        if ($this->preferences->get('foolfuuka.plugins.spam_guard.disable_nocomment') && $comment->comment->comment && $this->isBlankLooking($comment->comment->comment)) {
+            throw new \Foolz\FoolFuuka\Model\CommentSendingBannedException(_i('We were unable to process your comment at this time.'));
+        }
     }
 
     public function processAkismet($request, $comment)
@@ -182,6 +186,14 @@ class Validator extends Model
             }
         }
 
+        return false;
+    }
+
+    public function isBlankLooking($comment)
+    {
+        if (strlen(trim(preg_replace('/(>>(\d+(?:,\d+)?))/i', '', $comment))) < 1) {
+            return true;
+        }
         return false;
     }
 }
